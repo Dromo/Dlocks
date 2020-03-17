@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Plugin>
+  <Information>
+    <Name>Dlocks</Name>
+    <Author>Drono</Author>
+    <Version>0.1</Version>
+    <Description>Plugin for tracking weekly wrapper quests across servers</Description>
+  </Information>
+  <Package>Drono.Dlocks.Main</Package>
+  <Configuration Apartment="Dlocks"/>
+</Plugin>
