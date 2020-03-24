@@ -50,15 +50,6 @@ strings = {
         "The Joyous Court",
         "The Silver Court"
     },
-    ["skirm"] = {
-        "Skirmish Assault: Treacherous Wilds",
-        "Skirmish Assault: Beneath the World",
-        "Skirmish Assault: Shadows of Dol Guldur",
-        "Skirmish Assault: Strongholds of the Free Peoples"
-    },
-    ["skirmn"] = {
-        "Completed Skirmish Assaults across Middle%-earth %((%d+)/12%)"
-    },
     ["task"] = {
         "Completed Tasks %((%d+)/10%)"
     }
@@ -135,9 +126,6 @@ function command:Execute(cmd, args)
         if d ~= nil then
             if string.lower(d) == "sunday" then
                 ResetEmbers()
-            elseif string.lower(d) == "skirm" then
-                ResetSkirms()
-            end
         else
             ResetSettings()
         end
@@ -160,8 +148,6 @@ function command:Execute(cmd, args)
                 mylocks["instancesn"] = 0
                 mylocks["embers"] = 0
                 mylocks["rako"] = 0
-                mylocks["skirm"] = 0
-                mylocks["skirmn"] = 0
                 mylocks["task"]  = 0
             end
         end
@@ -313,8 +299,6 @@ function ConvertSettings() -- remove in later versions
                     tt["embers"] = tonumber(tt["embers"])
                     if tt["rako"] < 0 then tt["rako"] = 0 end
                     if tt["embers"] < 0 then tt["embers"] = 0 end
-                    tt["skirm"] = 0
-                    tt["skirmn"] = 0
                 end
             end
             temp = DeepTableCopy(settings)
@@ -383,8 +367,6 @@ function ShowSettings()
             text = text..Decor("E",tonumber(t["embers"])==1).." "
             text = text..Decor("R",tonumber(t["rako"])==1).." "
             text = text..Decor(t["task"].."/10",tonumber(t["task"])==10).." "
-            text = text..Decor(t["skirmn"],tonumber(t["skirm"])==1)
-            text = text.."/"..Decor("12",tonumber(t["skirmn"])>=12).." "
             if n==name and s==server then
                 text = text.."<rgb=#55AAFF>"..n.."</rgb> "
             else
@@ -458,15 +440,6 @@ function ResetEmbers()
     dprint("Monday reset performed.")
 end
 
-function ResetSkirms()
-    for s,t in pairs(settings["locks"]) do
-        for n,tt in pairs(t) do
-            tt["skirm"] = 0
-        end
-    end
-    dprint("New skirmish day started.")
-end
-
 function ResetCheck()
     if type(settings) ~= "table" then return end
     if type(settings["resets"]) ~= "table" then return end
@@ -505,16 +478,6 @@ cb = AddCallback(Turbine.Chat, "Received", function(sender,args)
                         elseif cat == "rako" or cat == "embers" then
                             if string.match(message, "Completed:") then
                                 mylocks[cat] = 1
-                            end
-                        elseif cat == "skirmn" then
-                            mylocks["skirmn"] = string.match(message, v)
-                            mylocks["skirm"] = 1
-                        elseif cat == "skirm" then
-                            if string.match(message, "New Quest:") then
-                                if settings["resets"]["skirm"] ~= v then
-                                    ResetSkirms()
-                                    settings["resets"]["skirm"] = v
-                                end
                             end
                         elseif string.sub(cat,-1)=='s' then
                             if string.match(message, "New Quest:") then
