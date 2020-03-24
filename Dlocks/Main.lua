@@ -438,7 +438,7 @@ function ResetEmbers()
         end
     end
     settings["resets"]["sunday"] = NextReset(1)
-    dprint("Monday reset performed.")
+    dprint("Sonday reset performed.")
 end
 
 function ResetCheck()
