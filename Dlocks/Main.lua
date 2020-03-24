@@ -126,6 +126,7 @@ function command:Execute(cmd, args)
         if d ~= nil then
             if string.lower(d) == "sunday" then
                 ResetEmbers()
+            end
         else
             ResetSettings()
         end
