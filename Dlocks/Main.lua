@@ -8,11 +8,11 @@ strings = {
     ["instances"] = {"Imlad Morgul: Vale of Sorcery"},
     ["scourges"] = {"Imlad Morgul: Continued Threats"},
     ["questsn"] = {
-        "Deep(.)barrow: Bones of Sacrifice",
-        "Deep(.)barrow: Runes of Corruption",
-        "Filth(.)well: Lost Relics",
-        "Filth(.)well: Remnants of Rauniel",
-        "Filth(.)well: Restoring the Morgulduin",
+        "Deep%-barrow: Bones of Sacrifice",
+        "Deep%-barrow: Runes of Corruption",
+        "Filth%-well: Lost Relics",
+        "Filth%-well: Remnants of Rauniel",
+        "Filth%-well: Restoring the Morgulduin",
         "Halls of Black Lore: Gordorian Scrolls",
         "Halls of Black Lore: Morgul Manuscripts",
         "Harrowing of Morgul: Brutal Instruments",
@@ -20,18 +20,18 @@ strings = {
         "Houses of Lamentation: Dark Rituals",
         "Houses of Lamentation: Roots of Evil",
         "Houses of Lamentation: The Reserves",
-        "Shadow(.)roost: Abandoned Eggs",
+        "Shadow%-roost: Abandoned Eggs",
         "Wanted: Crafter's Steel, Worn Trinkets",
-        "Wanted: Deep(.)lichen, Smoothed Stones",
+        "Wanted: Deep%-lichen, Smoothed Stones",
         "Wanted: Morgul Plaster, Treated Dowels",
         "Vales of Sorcery: The Trial of"
     },
     ["instancesn"] = {
         "The Harrowing of Morgul",
-        "Gath Daeroval, the Shadow(.)roost",
-        "Gorthad N\195\187r, the Deep(.)barrow",
-        "Ghashan(.)k\195\186tot, the Halls of Black Lore",
-        "Eithel Gwaur, the Filth(.)well",
+        "Gath Daeroval, the Shadow%-roost",
+        "Gorthad N\195\187r, the Deep%-barrow",
+        "Ghashan%-k\195\186tot, the Halls of Black Lore",
+        "Eithel Gwaur, the Filth%-well",
         "B\195\162r N\195\173rnaeth, the Houses of Lamentation",
         "The Fallen Kings"
     },
@@ -43,7 +43,7 @@ strings = {
         "The Gloom of Nurn, Scourge of Mordor",
         "The Grim Southron, Scourge of Mordor",
         "The High Sorcerer of Harad, Scourge of Mordor",
-        "The Witch(.)king, Lord of the Nazg\195\187l, Scourge of Mordor",
+        "The Witch%-king, Lord of the Nazg\195\187l, Scourge of Mordor",
         "The Woe of Khand, Scourge of Mordor",
         "The Court of Song",
         "The Guarded Court",
@@ -65,7 +65,7 @@ strings = {
 }
 
 day = {["sunday"] = 1, ["monday"] = 2, ["tuesday"] = 3, ["wednesday"] = 4,
-    ["thursday"] = 5, ["friday"] = 6, ["saturday"] = 7}   
+    ["thursday"] = 5, ["friday"] = 6, ["saturday"] = 7}
 
 function AddCallback(object, event, callback)
     if (object[event] == nil) then
@@ -339,7 +339,7 @@ end
 function UpdateCurrency()
     ember = 0
     sigil = 0
-    Player = Turbine.Gameplay.LocalPlayer.GetInstance(); 
+    Player = Turbine.Gameplay.LocalPlayer.GetInstance();
     PlayerWallet = Player:GetWallet();
     for i = 1, Player:GetWallet():GetSize() do
         local curItem = Player:GetWallet():GetItem(i);
@@ -354,7 +354,7 @@ end
 
 function ShowSettings()
     ember, sigil = UpdateCurrency()
-    text = ember.." Embers, "..sigil.." Sigils" 
+    text = ember.." Embers, "..sigil.." Sigils"
     ln = 0
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
