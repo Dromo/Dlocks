@@ -422,7 +422,7 @@ function ResetSettings()
                 tt["scourgesn"] = 0
             end
             tt["rako"] = 0
-            if tt["task"] == 10 then
+            if tonumber(tt["task"]) == 10 then
                tt["task"] = 0
             end
         end
