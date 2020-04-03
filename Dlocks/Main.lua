@@ -111,7 +111,7 @@ function command:GetHelp()
 /dlocks show                   Show progress
          set x/10 x/4 x/8      Manually set progress of current character
          reset (|sunday)        Manually do a weekly reset
-         resethour (0-23)       Set a hour at which daily reset happens
+         sethour (0-23)        Set a hour at which daily reset happens
          setserver <name>    Set name of the server
          add                  Add this char
          remove <name> <server> Remove char
@@ -174,7 +174,7 @@ function command:Execute(cmd, args)
             derror("Character not defined")
             return
         end
-        local w,p = string.match(args,"(%a+) (%d)",5)
+        local w,p = string.match(args,"(%a+) (%d+)",5)
         local a,b,c = string.match(args,"(%d+)/10 (%d)/4 (%d)/8",5);
         if w ~= nil then
             mylocks[w] = p
@@ -274,7 +274,6 @@ function sorted_keys(tableVar)
 end
 
 function LoadSettings()
-    ConvertSettings()
     if type(settings) ~= "table" then
         settings = {}
         settings["locks"] = {}
@@ -286,32 +285,6 @@ function LoadSettings()
         settings["locks"][server] = {}
     end
     return settings
-end
-
-function ConvertSettings() -- remove in later versions
-    if type(settings) == "table" then
-        if type(settings["resets"]) ~= "table" then
-            for s,t in pairs(settings) do
-                for n,tt in pairs(t) do
-                    tt["quests"] = tonumber(tt["quests"]) + 1
-                    tt["scourges"] = tonumber(tt["scourges"]) + 1
-                    tt["instances"] = tonumber(tt["instances"]) + 1
-                    tt["rako"] = tonumber(tt["rako"])
-                    tt["embers"] = tonumber(tt["embers"])
-                    if tt["rako"] < 0 then tt["rako"] = 0 end
-                    if tt["embers"] < 0 then tt["embers"] = 0 end
-                end
-            end
-            temp = DeepTableCopy(settings)
-            settings = {}
-            settings["locks"] = temp
-            settings["resets"] = {}
-            settings["resets"]["zone"] = 0
-            settings["resets"]["sunday"] = NextReset(1)
-            settings["resets"]["thursday"] = NextReset(5)
-        end
-    end
-    SaveSettings()
 end
 
 function SaveSettings()
@@ -335,6 +308,20 @@ function UpdateCurrency()
         end
     end
     return ember, sigil
+end
+
+function CurrencyCheck()
+    ember, sigil = UpdateCurrency()
+    warning = ""
+    if ember > 9000 then
+        warning = warning .. " " .. ember .. " Embers"
+    end
+    if sigil > 900 then
+        warning = warning .. " " .. sigil .. " Sigils"
+    end
+    if warning ~= "" then
+        dprint("<rgb=#FF8800>Warning!</rgb> You have"..warning)
+    end
 end
 
 function ShowSettings()
@@ -398,12 +385,11 @@ function NextReset(day)
     if zone > 20 then day = day - 1 end
     local reset = curTime + (day - curDate.DayOfWeek) * 24 * 60 * 60
     reset = reset + (zone - curDate.Hour) * 60 * 60
-    reset = reset - (curDate.Minute * 60)
-    reset = reset - curDate.Second
+    reset = reset - (reset % 3600)
     if (reset <= curTime) then
         reset = reset + 7 * 24 * 60 * 60
     end
-    return math.floor(reset)
+    return reset
 end
 
 function ResetSettings()
@@ -438,7 +424,7 @@ function ResetEmbers()
         end
     end
     settings["resets"]["sunday"] = NextReset(1)
-    dprint("Sonday reset performed.")
+    dprint("Sunday reset performed.")
 end
 
 function ResetCheck()
@@ -460,11 +446,14 @@ else
     if type(settings["locks"][server][name]) == "table" then
         mylocks = settings["locks"][server][name]
     end
+    ResetCheck()
 end
 tmpLastMessage = ""
 cb = AddCallback(Turbine.Chat, "Received", function(sender,args)
     if mylocks ~= nil then
+       ResetCheck()
        if args.ChatType == Turbine.ChatType.Quest then
+            CurrencyCheck()
             message = args.Message
             if message == tmpLastMessage then
                 return
