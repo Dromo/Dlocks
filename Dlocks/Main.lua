@@ -50,9 +50,16 @@ strings = {
         "The Joyous Court",
         "The Silver Court"
     },
-    ["task"] = {
-        "Completed Tasks %((%d+)/10%)"
+    ["task"] = {"Completed Tasks %((%d+)/10%)"},
+    ["wells"] = {"Protectors of Wilderland: Bounties"},
+    ["wellsn"] = {
+        "Bounty: Goblin at Tithroz",
+        "Bounty: Goblin at Scraper's Clough",
+        "Bounty: Goblin in the Cabed Rhimdath",
+        "Bounty: Goblin at the Forest's Edge",
+        "Bounty: Goblin at Veithh\195\179l"
     }
+
 }
 
 day = {["sunday"] = 1, ["monday"] = 2, ["tuesday"] = 3, ["wednesday"] = 4,
@@ -150,6 +157,8 @@ function command:Execute(cmd, args)
                 mylocks["embers"] = 0
                 mylocks["rako"] = 0
                 mylocks["task"]  = 0
+                mylocks["wells"] = 0
+                mylocks["wellsn"] = 0
             end
         end
     elseif string.sub(args,1,7) == "remove " then
@@ -336,22 +345,26 @@ function ShowSettings()
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
             t = settings["locks"][s][n]
-            if t["task"] == nil then
-                t["task"] = 0
+            if t["wells"] == nil then
+                t["wells"] = 0
+                t["wellsn"] = 0
             end
             done = false
             tq = tonumber(t["quests"])
             ti = tonumber(t["instances"])
             ts = tonumber(t["scourges"])
-            if tq > 0 and ti > 0 and ts > 0 then done = true end
+            tw = tonumber(t["wells"])
+            if tq > 1 and ti > 1 and ts > 1 and tw > 1 then done = true end
             text = text.."\n"
             if string.len(t["questsn"])<2 then text = text.." " end
-            text = text..Decor(t["questsn"],tonumber(t["quests"])==2)
+            text = text..Decor(t["questsn"],ts==2)
             text = text.."/"..Decor2("10",tq).." "
-            text = text..Decor(t["instancesn"],tonumber(t["instances"])==2)
+            text = text..Decor(t["instancesn"],ti==2)
             text = text.."/"..Decor2("4",ti).." "
-            text = text..Decor(t["scourgesn"],tonumber(t["scourges"])==2)
+            text = text..Decor(t["scourgesn"],ts==2)
             text = text.."/"..Decor2("8",ts).." "
+            text = text..Decor(t["wellsn"],tw==2)
+            text = text.."/"..Decor2("5",tw).." "
             text = text..Decor("E",tonumber(t["embers"])==1).." "
             text = text..Decor("R",tonumber(t["rako"])==1).." "
             text = text..Decor(t["task"].."/10",tonumber(t["task"])==10).." "
@@ -406,6 +419,10 @@ function ResetSettings()
             if tt["scourges"] > 1 then
                 tt["scourges"] = 0
                 tt["scourgesn"] = 0
+            end
+            if tt["wells"] > 1 then
+                tt["wells"] = 0
+                tt["wellsn"] = 0
             end
             tt["rako"] = 0
             if tonumber(tt["task"]) == 10 then
