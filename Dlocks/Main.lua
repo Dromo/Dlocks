@@ -357,7 +357,7 @@ function ShowSettings()
             if tq > 1 and ti > 1 and ts > 1 and tw > 1 then done = true end
             text = text.."\n"
             if string.len(t["questsn"])<2 then text = text.." " end
-            text = text..Decor(t["questsn"],ts==2)
+            text = text..Decor(t["questsn"],tq==2)
             text = text.."/"..Decor2("10",tq).." "
             text = text..Decor(t["instancesn"],ti==2)
             text = text.."/"..Decor2("4",ti).." "
