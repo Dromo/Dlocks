@@ -50,7 +50,7 @@ strings = {
         "The Joyous Court",
         "The Silver Court"
     },
-    ["task"] = {"Completed Tasks %((%d+)/10%)"},
+    ["task"] = {"Completed tasks %((%d+)/10%)"},
     ["wells"] = {"Protectors of Wilderland: Bounties"},
     ["wellsn"] = {
         "Bounty: Goblin at Tithroz",
