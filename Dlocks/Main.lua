@@ -58,8 +58,10 @@ strings = {
         "Bounty: Goblin in the Cabed Rhimdath",
         "Bounty: Goblin at the Forest's Edge",
         "Bounty: Goblin at Veithh\195\179l"
-    }
-
+    },
+    ["gundabads"] = {"Copper Coins of Gundabad for Embers"},
+    ["mission"] = {"Completed missions %((%d+)/15%)"},
+    ["seasonal"] = {"Collected vile gold coins from Storv\195\162g\195\187n %((%d+)/10%)"},
 }
 
 day = {["sunday"] = 1, ["monday"] = 2, ["tuesday"] = 3, ["wednesday"] = 4,
@@ -133,6 +135,8 @@ function command:Execute(cmd, args)
         if d ~= nil then
             if string.lower(d) == "sunday" then
                 ResetEmbers()
+            elseif string.lower(d) == "daily" then
+                ResetDaily()
             end
         else
             ResetSettings()
@@ -141,6 +145,8 @@ function command:Execute(cmd, args)
         settings["resets"]["zone"] = string.match(args, "%d+",8)
         settings["resets"]["sunday"] = NextReset(1)
         settings["resets"]["thursday"] = NextReset(5)
+        tomorow = (Turbine.Engine.GetDate().DayOfWeek + 1)
+        settings["resets"]["daily"] = NextReset(tomorow)
         dprint("Automatic resets will hapen at "..settings["resets"]["zone"])
     elseif args == "add" then
         if server ~= nil then
@@ -159,6 +165,10 @@ function command:Execute(cmd, args)
                 mylocks["task"]  = 0
                 mylocks["wells"] = 0
                 mylocks["wellsn"] = 0
+                mylocks["gundabads"] = 0
+                mylocks["seasonal"] = 0
+                mylocks["seasonald"] = 0
+                mylocks["missions"] = 0
             end
         end
     elseif string.sub(args,1,7) == "remove " then
@@ -178,6 +188,12 @@ function command:Execute(cmd, args)
                 end
             end
         end
+    elseif string.sub(args,1,5) == "hide " then
+        local w = string.match(args, "(%a+)" ,6)
+        settings["hide"][w] = 1
+    elseif string.sub(args,1,7) == "unhide " then
+        local w = string.match(args, "(%a+)" ,8)
+        settings["hide"][w] = nil
     elseif string.sub(args,1,4) == "set " then
         if mylocks == nil then
             derror("Character not defined")
@@ -287,11 +303,21 @@ function LoadSettings()
         settings = {}
         settings["locks"] = {}
         settings["resets"] = {}
+        settings["hide"] = {}
         settings["resets"]["sunday"] = NextReset(1)
         settings["resets"]["thursday"] = NextReset(5)
+        tomorow = (Turbine.Engine.GetDate().DayOfWeek + 1)
+        settings["resets"]["daily"] = NextReset(tomorow)
     end
     if type(settings["locks"][server]) ~= "table" then
         settings["locks"][server] = {}
+    end
+    if settings["resets"]["daily"] == nil then
+        tomorow = (Turbine.Engine.GetDate().DayOfWeek + 1)
+        settings["resets"]["daily"] = NextReset(tomorow)
+    end
+    if type(settings['hide']) ~= "table" then
+        settings['hide'] = {}
     end
     return settings
 end
@@ -345,29 +371,59 @@ function ShowSettings()
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
             t = settings["locks"][s][n]
-            if t["wells"] == nil then
-                t["wells"] = 0
-                t["wellsn"] = 0
+            if t["gundabads"] == nil then
+                t["gundabads"] = 0
+                t["seasonal"] = 0
+                t["seasonald"] = 0
+            end
+            if t["mission"] == nil then
+                t["mission"] = 0
             end
             done = false
             tq = tonumber(t["quests"])
             ti = tonumber(t["instances"])
             ts = tonumber(t["scourges"])
             tw = tonumber(t["wells"])
+            tf = tonumber(t["seasonal"])
             if tq > 1 and ti > 1 and ts > 1 and tw > 1 then done = true end
             text = text.."\n"
-            if string.len(t["questsn"])<2 then text = text.." " end
-            text = text..Decor(t["questsn"],tq==2)
-            text = text.."/"..Decor2("10",tq).." "
-            text = text..Decor(t["instancesn"],ti==2)
-            text = text.."/"..Decor2("4",ti).." "
-            text = text..Decor(t["scourgesn"],ts==2)
-            text = text.."/"..Decor2("8",ts).." "
-            text = text..Decor(t["wellsn"],tw==2)
-            text = text.."/"..Decor2("5",tw).." "
-            text = text..Decor("E",tonumber(t["embers"])==1).." "
-            text = text..Decor("R",tonumber(t["rako"])==1).." "
-            text = text..Decor(t["task"].."/10",tonumber(t["task"])==10).." "
+            if settings["hide"]['quests'] == nil then
+                if string.len(t["questsn"])<2 then text = text.." " end
+                text = text..Decor(t["questsn"],tq==2)
+                text = text.."/"..Decor2("10",tq).." "
+            end
+            if settings["hide"]['instances'] == nil then
+                text = text..Decor(t["instancesn"],ti==2)
+                text = text.."/"..Decor2("4",ti).." "
+            end
+            if settings["hide"]['scourges'] == nil then
+                text = text..Decor(t["scourgesn"],ts==2)
+                text = text.."/"..Decor2("8",ts).." "
+            end
+            if settings["hide"]['wells'] == nil then
+                text = text..Decor(t["wellsn"],tw==2)
+                text = text.."/"..Decor2("5",tw).." "
+            end
+            if settings["hide"]['embers'] == nil then
+                text = text..Decor("E",tonumber(t["embers"])==1)
+                text = text..Decor("E",tonumber(t["gundabads"])==1).." "
+            end
+            if settings["hide"]['mission'] == nil then
+                local tm = t["mission"]
+                if string.len(tm)<2 then text = text.." " end
+                text = text..Decor(tm.."/15",tonumber(tm)==15).." "
+            end
+            if settings["hide"]['rako'] == nil then
+                text = text..Decor("R",tonumber(t["rako"])==1).." "
+            end
+            if settings["hide"]['task'] == nil then
+                if string.len(t["task"])<2 then text = text.." " end
+                text = text..Decor(t["task"].."/10",tonumber(t["task"])==10).." "
+            end
+            if settings["hide"]['seasonal'] == nil then
+                text = text..Decor2("S",t["seasonald"])
+                text = text..Decor(t["seasonal"].."/10",tf==10).." "
+            end
             if n==name and s==server then
                 text = text.."<rgb=#55AAFF>"..n.."</rgb> "
             else
@@ -426,7 +482,10 @@ function ResetSettings()
             end
             tt["rako"] = 0
             if tonumber(tt["task"]) == 10 then
-               tt["task"] = 0
+                tt["task"] = 0
+            end
+            if tonumber(tt["mission"]) == 15 then
+                tt["mission"] = 0
             end
         end
     end
@@ -438,10 +497,24 @@ function ResetEmbers()
     for s,t in pairs(settings["locks"]) do
         for n,tt in pairs(t) do
             tt["embers"] = 0
+            tt["gundabads"] = 0
         end
     end
     settings["resets"]["sunday"] = NextReset(1)
     dprint("Sunday reset performed.")
+end
+
+function ResetDaily()
+    for s,t in pairs(settings["locks"]) do
+        for n,tt in pairs(t) do
+            if tonumber(tt["seasonal"]) < 2 then
+                tt["seasonald"] = 0
+            end
+        end
+    end
+    tomorow = (Turbine.Engine.GetDate().DayOfWeek + 1)
+    settings["resets"]["daily"] = NextReset(tomorow)
+    dprint("Daily reset performed.")
 end
 
 function ResetCheck()
@@ -450,6 +523,7 @@ function ResetCheck()
     local time = Turbine.Engine.GetLocalTime()
     if time > settings["resets"]["sunday"] then ResetEmbers() end
     if time > settings["resets"]["thursday"] then ResetSettings() end
+    if time > settings["resets"]["daily"] then ResetDaily() end
 end
 
 server = Turbine.PluginData.Load(Turbine.DataScope.Server,"ServerName")
@@ -480,9 +554,12 @@ cb = AddCallback(Turbine.Chat, "Received", function(sender,args)
             for cat,tab in pairs(strings) do
                 for k,v in pairs(tab) do
                     if string.match(message, v) then
-                        if cat == "task" then
+                        if cat == "task" or cat == "mission" then
                             mylocks[cat] = string.match(message, v)
-                        elseif cat == "rako" or cat == "embers" then
+                        elseif cat == "seasonal" then
+                            mylocks[cat] = string.match(message, v)
+                            mylocks[cat..'d'] = 1
+                        elseif cat == "rako" or cat == "embers" or cat == "gundabads" then
                             if string.match(message, "Completed:") then
                                 mylocks[cat] = 1
                             end
@@ -513,5 +590,4 @@ Plugins["Dlocks"].Unload = function(self,sender,args)
     RemoveCallback(Turbine.Chat, "Received", cb)
     SaveSettings();
 end
-
 
