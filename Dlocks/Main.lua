@@ -507,7 +507,7 @@ end
 function ResetDaily()
     for s,t in pairs(settings["locks"]) do
         for n,tt in pairs(t) do
-            if tonumber(tt["seasonal"]) < 2 then
+            if tonumber(tt["seasonald"]) < 2 then
                 tt["seasonald"] = 0
             end
         end
