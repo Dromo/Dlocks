@@ -62,6 +62,15 @@ strings = {
     ["gundabads"] = {"Copper Coins of Gundabad for Embers"},
     ["mission"] = {"Completed missions %((%d+)/15%)"},
     ["seasonal"] = {"Collected vile gold coins from Storv\195\162g\195\187n %((%d+)/10%)"},
+    ["skirm"] = {
+        "Skirmish Assault: Treacherous Wilds",
+        "Skirmish Assault: Beneath the World",
+        "Skirmish Assault: Shadows of Dol Guldur",
+        "Skirmish Assault: Strongholds of the Free Peoples"
+    },
+    ["skirmn"] = {
+        "Completed Skirmish Assaults across Middle%-earth %((%d+)/12%)"
+    },
 }
 
 day = {["sunday"] = 1, ["monday"] = 2, ["tuesday"] = 3, ["wednesday"] = 4,
@@ -108,6 +117,50 @@ if Turbine.Engine.GetLanguage() ~= Turbine.Language.English then
     derror("Dlocks works only on English client.")
     return
 end
+command1 = Turbine.ShellCommand()
+Turbine.Shell.AddCommand("skirm",command1)
+function command1:GetShortHelp()
+    return("Dlocks skirm - usage: /skirm help")
+end
+
+function command1:GetHelp()
+    return([[/skirm server char 1011
+        /skirm server char yyny
+    1 : Skirmish Assault: Treacherous Wilds
+    2 : Skirmish Assault: Beneath the World
+    3 : Skirmish Assault: Shadows of Dol Guldur
+    4 : Skirmish Assault: Strongholds of the Free Peoples
+    ]])
+end
+
+function command1:Execute(cmd, args)
+    local s,ch,bit = string.match(args,"(%a+) (%a+) (%a+)")
+    if s ~= nil and ch ~= nil and bit ~= nil then
+        bit = string.lower(bit)
+        for i = 1, #bit do
+            local c = bit:sub(i,i)
+            allowed = "yn10"
+            if not string.find(allowed, c) then
+                derror("skirm - not allowed char '"..c.."' in bit")
+                return
+            end
+        end
+        bit = string.gsub(bit, 'y', '1')
+        bit = string.gsub(bit, 'n', '0')
+        if settings["locks"][s] ~= nil then
+            if settings["locks"][s][ch] ~= nil then
+                settings["locks"][s][ch]["skirmbit"] = bit
+                dprint("Skirm set skirm bit to '"..bit.."' for "..ch.." at "..s)
+            else
+                derror("skirm - unknown character '"..ch.."' at server '"..s.."'")
+            end
+        else
+            derror("skirm - unknown server '"..s.."'")
+        end
+    else
+        Turbine.Shell.WriteLine(self:GetHelp())
+    end
+end
 
 command = Turbine.ShellCommand()
 Turbine.Shell.AddCommand("dlocks",command)
@@ -137,6 +190,8 @@ function command:Execute(cmd, args)
                 ResetEmbers()
             elseif string.lower(d) == "daily" then
                 ResetDaily()
+            else
+                Reset(string.lower(d))
             end
         else
             ResetSettings()
@@ -169,6 +224,8 @@ function command:Execute(cmd, args)
                 mylocks["seasonal"] = 0
                 mylocks["seasonald"] = 0
                 mylocks["missions"] = 0
+                mylocks["skirm"] = 0
+                mylocks["skirmn"] = 0
             end
         end
     elseif string.sub(args,1,7) == "remove " then
@@ -371,13 +428,11 @@ function ShowSettings()
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
             t = settings["locks"][s][n]
-            if t["gundabads"] == nil then
-                t["gundabads"] = 0
-                t["seasonal"] = 0
-                t["seasonald"] = 0
-            end
-            if t["mission"] == nil then
-                t["mission"] = 0
+            keys = {"skirm", "skirmn", "gundabads","seasonald", "mission"}
+            for k,key in pairs(keys) do
+                if t[key] == nil then
+                    t[key] = 0
+                end
             end
             done = false
             tq = tonumber(t["quests"])
@@ -423,6 +478,22 @@ function ShowSettings()
             if settings["hide"]['seasonal'] == nil then
                 text = text..Decor2("S",t["seasonald"])
                 text = text..Decor(t["seasonal"].."/10",tf==10).." "
+            end
+            if settings["hide"]["skirm"] == nil then
+                if settings["resets"]["skirmday"] ~= nil then
+                    skirmday = settings["resets"]["skirmday"]
+                end
+                if skirmday ~= nil and t["skirmbit"] ~= nil then
+                    local bit = string.sub(t["skirmbit"],skirmday,skirmday)
+                    if bit == '0' then
+                        text = text..t["skirmn"]
+                    else
+                        text = text..Decor2(t["skirmn"],tonumber(t["skirm"])+1)
+                    end
+                else
+                    text = text..Decor(t["skirmn"],tonumber(t["skirm"])==1)
+                end
+                text = text.."/"..Decor("12",tonumber(t["skirmn"])>=12).." "
             end
             if n==name and s==server then
                 text = text.."<rgb=#55AAFF>"..n.."</rgb> "
@@ -509,12 +580,24 @@ function ResetDaily()
         for n,tt in pairs(t) do
             if tonumber(tt["seasonald"]) < 2 then
                 tt["seasonald"] = 0
+                Reset("skirm")
             end
         end
     end
     tomorow = (Turbine.Engine.GetDate().DayOfWeek + 1)
     settings["resets"]["daily"] = NextReset(tomorow)
     dprint("Daily reset performed.")
+end
+
+function Reset(column)
+    for s,t in pairs(settings["locks"]) do
+        for n,tt in pairs(t) do
+            if tt[column] ~= nil then
+                tt[column] = 0
+            end
+        end
+    end
+    dprint("New skirmish day started")
 end
 
 function ResetCheck()
@@ -559,6 +642,11 @@ cb = AddCallback(Turbine.Chat, "Received", function(sender,args)
                         elseif cat == "seasonal" then
                             mylocks[cat] = string.match(message, v)
                             mylocks[cat..'d'] = 1
+                        elseif cat == "skirmn" then
+                            mylocks["skirmn"] = string.match(message, v)
+                            mylocks["skirm"] = 1
+                        elseif cat == "skirm" then
+                            settings["resets"]["skirmday"] = k
                         elseif cat == "rako" or cat == "embers" or cat == "gundabads" then
                             if string.match(message, "Completed:") then
                                 mylocks[cat] = 1
