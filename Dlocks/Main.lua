@@ -428,8 +428,8 @@ function ShowSettings()
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
             t = settings["locks"][s][n]
-            keys = {"skirm", "skirmn", "gundabads","seasonald", "mission"}
-            for k,key in pairs(keys) do
+            newkeys = {"skirm", "skirmn", "gundabads","seasonald", "mission"}
+            for k,key in pairs(newkeys) do
                 if t[key] == nil then
                     t[key] = 0
                 end
@@ -580,7 +580,7 @@ function ResetDaily()
         for n,tt in pairs(t) do
             if tonumber(tt["seasonald"]) < 2 then
                 tt["seasonald"] = 0
-                Reset("skirm")
+                tt["skirm"] = 0
             end
         end
     end
