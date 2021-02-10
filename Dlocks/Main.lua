@@ -134,8 +134,19 @@ function command1:GetHelp()
 end
 
 function command1:Execute(cmd, args)
-    local s,ch,bit = string.match(args,"(%a+) (%a+) (%a+)")
-    if s ~= nil and ch ~= nil and bit ~= nil then
+    local s,ch,bit = string.match(args,"(%a+) (%a+) (%w+)")
+    if args == "show" then
+        text = "Table of set bits for Ill Omens event:\n"
+        for s in sorted_keys(settings["locks"]) do
+            for n in sorted_keys(settings["locks"][s]) do
+                t = settings["locks"][s][n]
+                if t["skirmbit"] ~= nil then
+                    text = text..t["skirmbit"].." "..n.." "..s.."\n"
+                end
+            end
+        end
+        dprint(text)
+    elseif s ~= nil and ch ~= nil and bit ~= nil then
         bit = string.lower(bit)
         for i = 1, #bit do
             local c = bit:sub(i,i)
