@@ -439,7 +439,7 @@ function ShowSettings()
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
             t = settings["locks"][s][n]
-            newkeys = {"skirm", "skirmn", "gundabads","seasonald", "mission"}
+            newkeys = {"skirm", "skirmn", "gundabads", "seasonal", "seasonald", "mission"}
             for k,key in pairs(newkeys) do
                 if t[key] == nil then
                     t[key] = 0
