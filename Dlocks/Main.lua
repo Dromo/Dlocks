@@ -137,15 +137,63 @@ function command1:Execute(cmd, args)
     local s,ch,bit = string.match(args,"(%a+) (%a+) (%w+)")
     if args == "show" then
         text = "Table of set bits for Ill Omens event:\n"
+        ts = ""
         for s in sorted_keys(settings["locks"]) do
             for n in sorted_keys(settings["locks"][s]) do
                 t = settings["locks"][s][n]
+                tioff = 0
                 if t["skirmbit"] ~= nil then
-                    text = text..t["skirmbit"].." "..n.." "..s.."\n"
+                    if settings["resets"]["offset"] ~= nil then
+                        offservers = settings["resets"]["offserver"]
+                        if offservers ~= nil then
+                            for i = 1, #offservers do
+                                if offservers[i] == s then
+                                    tioff = settings["resets"]["offset"]
+                                    ts = "*"
+                                end
+                            end
+                        end
+                    end
+                    sortedstring = ""
+                    for i = 1, 4 do
+                        ti = ((i + tioff - 1) % 4) + 1
+                        bit = string.sub(t["skirmbit"],ti,ti)
+                        if bit == "1" then
+                            sortedstring = sortedstring..ti
+                        else
+                            sortedstring = sortedstring.."0"
+                        end
+                    end
+                    text = text..t["skirmbit"].." "..sortedstring.." "..n.." "..s..ts.."\n"
                 end
             end
         end
         dprint(text)
+    elseif string.sub(args,1,6) == "offset" then
+        offset = string.match(args,"(%d+)",8)
+        if offset ~= nil then
+            settings["resets"]["offset"] = offset
+        else
+            derror("proper usage: /skirm offset <number>")
+        end
+    elseif string.sub(args,1,9) == "offserver" then
+        offserver = string.match(args,"(%w+)",10)
+        if offserver ~= nil then
+            if settings["resets"]["offserver"] ~= nil then
+                for i = 1, #settings["resets"]["offserver"] do
+                    if settings["resets"]["offserver"][i] == offserver then
+                        derror("Server already in list")
+                        return
+                    end
+                end
+            else
+                settings["resets"]["offserver"] = {}
+            end
+            table.insert(settings["resets"]["offserver"], offserver)
+        else
+            derror("proper usage: /skirm offserver <servername>")
+        end
+
     elseif s ~= nil and ch ~= nil and bit ~= nil then
         bit = string.lower(bit)
         for i = 1, #bit do
@@ -495,6 +543,17 @@ function ShowSettings()
                     skirmday = settings["resets"]["skirmday"]
                 end
                 if skirmday ~= nil and t["skirmbit"] ~= nil then
+                    if settings["resets"]["offset"] ~= nil then
+                        local offservers = settings["resets"]["offserver"]
+                        if offservers ~= nil then
+                            for i = 1, #offservers do
+                                if offservers[i] == server then
+                                    skirmday = (skirmday - 1) + settings["resets"]["offset"]
+                                    skirmday = (skirmday % 4) + 1
+                                end
+                            end
+                        end
+                    end
                     local bit = string.sub(t["skirmbit"],skirmday,skirmday)
                     if bit == '0' then
                         text = text..t["skirmn"]
@@ -657,7 +716,18 @@ cb = AddCallback(Turbine.Chat, "Received", function(sender,args)
                             mylocks["skirmn"] = string.match(message, v)
                             mylocks["skirm"] = 1
                         elseif cat == "skirm" then
-                            settings["resets"]["skirmday"] = k
+                            local temp = settings["resets"]["offserver"]
+                            local tempk = k
+                            if temp ~= nil then
+                                for i = 1, #temp do
+                                    if temp[i] == server then
+                                        tempk = tempk - 1
+                                        tempk = tempk + settings["resets"]["offset"]
+                                        tempk = (tempk % 4) + 1
+                                    end
+                                end
+                            end
+                            settings["resets"]["skirmday"] = tempk
                         elseif cat == "rako" or cat == "embers" or cat == "gundabads" then
                             if string.match(message, "Completed:") then
                                 mylocks[cat] = 1
