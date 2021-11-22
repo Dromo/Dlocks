@@ -11,10 +11,10 @@ strings = {
     },
     ["gundabadquests"] = {
         "Completed Gundabad: Reclaiming the Mountain%-hold quests %((%d+)/20%)"
-    }
+    },
     ["gundabadmissions"] = {
         "Completed Gundabad: Reclaiming the Mountain%-hold quests %((%d+)/20%)"
-    }
+    },
     ["embers"] = {"Sigils of Imlad Ithil for Embers"},
     ["quests"] = {"Imlad Morgul: The Reclamation"},
     ["instances"] = {"Imlad Morgul: Vale of Sorcery"},
@@ -538,7 +538,6 @@ function ShowSettings()
             end
             if settings["hide"]['gundabadinstances'] == nil then
                 local tm = t["gundabadinstances"]
-                if string.len(tm)<2 then text = text.." " end
                 text = text..Decor(tm.."/6",tonumber(tm)==6).." "
             end
             if settings["hide"]['gundabadmissions'] == nil then
@@ -547,7 +546,7 @@ function ShowSettings()
                 text = text..Decor(tm.."/20",tonumber(tm)==20).." "
             end
             if settings["hide"]['embers'] == nil then
-                text = text..Decor("E",tonumber(t["gundabadembers"])==1)
+                text = text..Decor("E",tonumber(t["gundabadembers"])==1).." "
             end
             if settings["hide"]['mission'] == nil then
                 local tm = t["mission"]
