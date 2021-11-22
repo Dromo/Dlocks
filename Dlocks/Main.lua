@@ -479,8 +479,8 @@ function CurrencyCheck()
     if ember > 9000 then
         warning = warning .. " " .. ember .. " Embers"
     end
-    if sigil > 900 then
-        warning = warning .. " " .. sigil .. " Sigils"
+    if sigil > 450 then
+        warning = warning .. " " .. sigil .. " Silver Coins of Gundabad"
     end
     if warning ~= "" then
         dprint("<rgb=#FF8800>Warning!</rgb> You have"..warning)
@@ -489,7 +489,7 @@ end
 
 function ShowSettings()
     ember, sigil = UpdateCurrency()
-    text = ember.." Embers, "..sigil.." Sigils"
+    text = ember.." Embers, "..sigil.." Silver Coins of Gundabad"
     ln = 0
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
