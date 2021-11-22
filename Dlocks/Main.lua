@@ -3,6 +3,18 @@ import "Turbine.Gameplay"
 
 strings = {
     ["rako"] = {"Challenge: Short Fuse"},
+    ["gundabadembers"] = {
+        "Silver Coins of Gundabad for Embers"
+    },
+    ["gundabadinsatnces"] = {
+        "Completed Gundabad instances %((%d+)/6%)"
+    },
+    ["gundabadquests"] = {
+        "Completed Gundabad: Reclaiming the Mountain%-hold quests %((%d+)/20%)"
+    }
+    ["gundabadmissions"] = {
+        "Completed Gundabad: Reclaiming the Mountain%-hold quests %((%d+)/20%)"
+    }
     ["embers"] = {"Sigils of Imlad Ithil for Embers"},
     ["quests"] = {"Imlad Morgul: The Reclamation"},
     ["instances"] = {"Imlad Morgul: Vale of Sorcery"},
@@ -487,7 +499,8 @@ function ShowSettings()
     for s in sorted_keys(settings["locks"]) do
         for n in sorted_keys(settings["locks"][s]) do
             t = settings["locks"][s][n]
-            newkeys = {"skirm", "skirmn", "gundabads", "seasonal", "seasonald", "mission"}
+            newkeys = {"gundabadmissions", "gundabadinstances",
+                "gundabadembers", "gundabadquests"}
             for k,key in pairs(newkeys) do
                 if t[key] == nil then
                     t[key] = 0
@@ -518,14 +531,28 @@ function ShowSettings()
                 text = text..Decor(t["wellsn"],tw==2)
                 text = text.."/"..Decor2("5",tw).." "
             end
+            if settings["hide"]['gundabadquests'] == nil then
+                local tm = t["gundabadquests"]
+                if string.len(tm)<2 then text = text.." " end
+                text = text..Decor(tm.."/20",tonumber(tm)==20).." "
+            end
+            if settings["hide"]['gundabadinstances'] == nil then
+                local tm = t["gundabadinstances"]
+                if string.len(tm)<2 then text = text.." " end
+                text = text..Decor(tm.."/6",tonumber(tm)==6).." "
+            end
+            if settings["hide"]['gundabadmissions'] == nil then
+                local tm = t["gundabadmissions"]
+                if string.len(tm)<2 then text = text.." " end
+                text = text..Decor(tm.."/20",tonumber(tm)==20).." "
+            end
             if settings["hide"]['embers'] == nil then
-                text = text..Decor("E",tonumber(t["embers"])==1)
-                text = text..Decor("E",tonumber(t["gundabads"])==1).." "
+                text = text..Decor("E",tonumber(t["gundabadembers"])==1)
             end
             if settings["hide"]['mission'] == nil then
                 local tm = t["mission"]
                 if string.len(tm)<2 then text = text.." " end
-                text = text..Decor(tm.."/15",tonumber(tm)==15).." "
+                text = text..Decor(tm.."/45",tonumber(tm)==45).." "
             end
             if settings["hide"]['rako'] == nil then
                 text = text..Decor("R",tonumber(t["rako"])==1).." "
@@ -707,7 +734,7 @@ cb = AddCallback(Turbine.Chat, "Received", function(sender,args)
             for cat,tab in pairs(strings) do
                 for k,v in pairs(tab) do
                     if string.match(message, v) then
-                        if cat == "task" or cat == "mission" then
+                        if cat == "task" or cat == "mission" or cat == "gundabadmissions" or cat == "gundabadinstances" or cat == "gundabadquests" then
                             mylocks[cat] = string.match(message, v)
                         elseif cat == "seasonal" then
                             mylocks[cat] = string.match(message, v)
@@ -728,7 +755,7 @@ cb = AddCallback(Turbine.Chat, "Received", function(sender,args)
                                 end
                             end
                             settings["resets"]["skirmday"] = tempk
-                        elseif cat == "rako" or cat == "embers" or cat == "gundabads" then
+                        elseif cat == "rako" or cat == "embers" or cat == "gundabads" or cat == "gundabadembers" then
                             if string.match(message, "Completed:") then
                                 mylocks[cat] = 1
                             end
