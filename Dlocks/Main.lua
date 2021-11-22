@@ -466,7 +466,7 @@ function UpdateCurrency()
         local curItem = Player:GetWallet():GetItem(i);
         if curItem:GetName() == "Embers of Enchantment" then
             ember = curItem:GetQuantity()
-        elseif curItem:GetName() == "Sigil of Imlad Ithil" then
+        elseif curItem:GetName() == "Silver Coin of Gundabad" then
             sigil = curItem:GetQuantity()
         end
     end
