@@ -13,7 +13,7 @@ strings = {
         "Completed Gundabad: Reclaiming the Mountain%-hold quests %((%d+)/20%)"
     },
     ["gundabadmissions"] = {
-        "Completed Gundabad: Reclaiming the Mountain%-hold quests %((%d+)/20%)"
+        "Completed missions in the Gundabad %((%d+)/20%)"
     },
     ["embers"] = {"Sigils of Imlad Ithil for Embers"},
     ["quests"] = {"Imlad Morgul: The Reclamation"},
@@ -654,6 +654,15 @@ function ResetSettings()
             if tonumber(tt["mission"]) == 15 then
                 tt["mission"] = 0
             end
+            if tonumber(tt["gundabadinsatnces"]) == 6 then
+                tt["gundabadinsatnces"] = 0
+            end
+            if tonumber(tt["gundabadquests"]) == 20 then
+                tt["gundabadquests"] = 0
+            end
+            if tonumber(tt["gundabadmissions"]) == 20 then
+                tt["gundabadmissions"] = 0
+            end
         end
     end
     settings["resets"]["thursday"] = NextReset(5)
@@ -665,6 +674,7 @@ function ResetEmbers()
         for n,tt in pairs(t) do
             tt["embers"] = 0
             tt["gundabads"] = 0
+            tt["gundabadembers"] = 0
         end
     end
     settings["resets"]["sunday"] = NextReset(1)
