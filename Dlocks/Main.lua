@@ -6,7 +6,7 @@ strings = {
     ["gundabadembers"] = {
         "Silver Coins of Gundabad for Embers"
     },
-    ["gundabadinsatnces"] = {
+    ["gundabadinstances"] = {
         "Completed Gundabad instances %((%d+)/6%)"
     },
     ["gundabadquests"] = {
